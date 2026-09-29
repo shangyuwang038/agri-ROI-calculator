@@ -747,7 +747,6 @@ button:hover{
 </div>
 
 <script>
-// ========== Google Apps Script Web App URL (filled your provided link) ==========
 const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUbYguLrNRJSBIC3YpsnJWUV7XcdUxqJaZBgkq6l1Llrh_2rd0A_d4gnYe959fSveN/exec";
 
 let activeStepNumber = 0;
@@ -851,15 +850,14 @@ function collectUserData(){
   };
 }
 
-// ========== Send data to Google Sheet via Apps Script Web App ==========
 async function sendToGoogleSheet(data){
   try{
     const res = await fetch(GOOGLE_SCRIPT_WEB_APP_URL,{
-      method:"POST",
-      mode:"no‑cors",
-      headers:{"Content‑Type":"application/json"},
-      body:JSON.stringify(data)
-    });
+  method:"POST",
+  mode:"no-cors",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify(data)
+});
     console.log("Data sent to Google Sheet");
   }catch(err){
     console.error("Google Sheet submit error:", err);
