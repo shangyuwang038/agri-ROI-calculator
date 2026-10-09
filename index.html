@@ -664,7 +664,6 @@ button:hover{
         <p class="input-desc">Include country code for direct contact.</p>
         <input id="custPhone"required type="text" placeholder="Include country code">
       </div>
-      <!-- 替换原有Country输入框 -->
       <div class="form-row">
         <label>Country / Region</label>
           <select id="countrySelect">
@@ -829,7 +828,6 @@ document.getElementById('resetAll').onclick = ()=>{
   setActiveStep(0);
 };
 
-// ========== Collect all user data【匹配你表头顺序】 ==========
 function collectUserData(){
   const farmSizeCard = document.querySelector('#farmSizeOptions .option-card.active');
   let farmSize = "";
@@ -853,7 +851,59 @@ function collectUserData(){
   const phone = document.getElementById('custPhone').value || "";
   const country = document.getElementById('custRegion').value || "";
   const industry = document.getElementById('custIndustry').value || "";
+if (!name || !countryVal || !mail) {
+        alert("Please fill all required fields.");
+        return;
+    }
 
+    if (!/^[^@]+@[^@]+\.[^@]+$/.test(mail)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    const url =
+        API_URL +
+        "?action=lead" +
+        "&name=" + encodeURIComponent(name) +
+        "&country=" + encodeURIComponent(countryVal) +
+        "&email=" + encodeURIComponent(mail) +
+        "&score=" + encodeURIComponent(score) +
+        "&industry=" + encodeURIComponent(industry) +
+        "&interest=" + encodeURIComponent(interests);
+
+    fetch(url)
+        .then(response => response.json())
+        .then(resp => {
+
+            console.log(resp);
+
+            if (resp.status === "duplicate") {
+                alert("This email has already been submitted.");
+                return;
+            }
+
+            if (resp.status === "success") {
+              const result = getResultLevel(score, questions.length);
+
+              const tenPointScore = getScoreOutOfTen();
+
+              document.getElementById("finalScore").innerText =
+                `Your Score: ${tenPointScore}`;
+
+              document.getElementById("resultLevel").innerText = result.title;
+
+              document.getElementById("resultComment").innerText = result.comment;
+
+              document.getElementById("lead").classList.add("hidden");
+              document.getElementById("thanks").classList.remove("hidden");
+}
+
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Submission failed.");
+        });
+}
   return {
     timestamp: new Date().toISOString(),
     name: name,
