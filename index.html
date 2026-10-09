@@ -664,11 +664,16 @@ button:hover{
         <p class="input-desc">Include country code for direct contact.</p>
         <input id="custPhone"required type="text" placeholder="Include country code">
       </div>
-      <div class="form-group">
+      <!-- 替换原有Country输入框 -->
+      <div class="form-row">
         <label>Country / Region</label>
-        <p class="input-desc">Where your farm operation is located.</p>
-        <input id="custRegion"required type="text" placeholder="e.g. Kenya, Mexico">
+          <select id="countrySelect">
+          <option value="">Loading countries...</option>
+          </select>
+        <div class="hint">Select your farm's operating country or region</div>
+        <div class="error-text" style="color:red;display:none;">Please select your country / region</div>
       </div>
+
       <div class="form-group">
         <label>Industry</label>
         <p class="input-desc">Select the sector your farm business belongs to.</p>
