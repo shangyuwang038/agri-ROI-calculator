@@ -6,10 +6,6 @@
 <title>Smart Farm Savings | Precision Guidance ROI Estimator</title>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-<div class="logo-top-right">
-  <img src="logo.png" alt="SingularXYZ Logo">
-</div>
-  
 <style>
 *{
   box-sizing:border-box;
@@ -18,22 +14,22 @@
   padding:0;
 }
 body{
+  position:relative; /* logo 锚定在内容列内 */
   background-color:#f8faf6;
   color:#22332c;
   padding:20px;
   max-width:1000px;
   margin:0 auto;
 }
-  .logo-top-right {
-  position: absolute;
+.logo-top-right{
+  position:absolute;
   top:16px;
   right:16px;
 }
-.logo-top-right img {
+.logo-top-right img{
   height:48px;
   width:auto;
 }
-
 
 /* ========== Step Progress Bar ========== */
 .step-bar{
@@ -112,6 +108,9 @@ label{
   font-size:16px;
   font-weight:500;
 }
+.req{
+  color:#e74c3c;
+}
 .input-desc{
   font-size:14px;
   color:#66776f;
@@ -132,6 +131,12 @@ input:focus, select:focus{
   outline:none;
   border-color:#88ca93;
   box-shadow:0 0 0 3px rgba(136,202,147,0.2);
+}
+.field-error{
+  display:none;
+  color:#e74c3c;
+  font-size:14px;
+  line-height:1.5;
 }
 .btn-row{
   margin-top:12px;
@@ -227,6 +232,26 @@ button:hover{
   line-height:1.5;
 }
 
+/* ========== QR Code Block (结果页) ========== */
+.qr-block{
+  text-align:center;
+  margin-top:28px;
+  padding-top:24px;
+  border-top:1px solid #e7ecea;
+}
+.qr-block img{
+  width:160px;
+  height:160px;
+  border-radius:12px;
+  border:1px solid #e1ece4;
+  max-width:100%;
+}
+.qr-block p{
+  font-size:14px;
+  color:#66776f;
+  margin-top:10px;
+}
+
 /* ========== Comparison Block ========== */
 .comparison{
   margin-top:24px;
@@ -300,7 +325,7 @@ button:hover{
   display:block;
 }
 
-/* ========== Hero Animation Screen - Tractor adjusted lower + stronger shadow ========== */
+/* ========== Hero Animation Screen ========== */
 .hero{
   position:relative;
   width:100%;
@@ -363,13 +388,13 @@ button:hover{
 }
 .tractor{
   position:absolute;
-  bottom:8%; /*进一步下沉，轮胎贴近地面*/
+  bottom:8%;
   left:-220px;
   width:200px;
   height:110px;
   animation:driveTractor 10s linear infinite;
   z-index:2;
-  filter: drop-shadow(0 14px 10px rgba(20,40,20,0.45)); /*加强接地阴影*/
+  filter: drop-shadow(0 14px 10px rgba(20,40,20,0.45));
 }
 .tractor svg{
   width:100%;
@@ -516,6 +541,11 @@ button:hover{
 </head>
 <body>
 
+<!-- ========== 顶部 Logo ========== -->
+<div class="logo-top-right">
+  <img src="logo.png" alt="SingularXYZ Logo" onerror="this.parentElement.style.display='none';">
+</div>
+
 <!-- ========== Step 0: Hero Animation ========== -->
 <div class="step active" id="step0">
   <div class="hero">
@@ -638,7 +668,7 @@ button:hover{
   </div>
 </div>
 
-<!-- ========== Step 2: Customer Info ========== -->
+<!-- ========== Step 2: Customer Info（线索收集，全部必填） ========== -->
 <div class="step" id="step2">
   <div class="page-header">
     <h1>Tell us about yourself.</h1>
@@ -650,33 +680,36 @@ button:hover{
   <div class="form-card">
     <div class="form-stack">
       <div class="form-group">
-        <label>Full Name</label>
+        <label for="custName">Full Name <span class="req">*</span></label>
         <p class="input-desc">Your full name for report delivery.</p>
-        <input id="custName"required type="text" placeholder="Your full name">
+        <input id="custName" required type="text" placeholder="Your full name">
+        <div class="field-error" id="nameError">Please fill in your full name.</div>
       </div>
       <div class="form-group">
-        <label>Email address</label>
+        <label for="custEmail">Email address <span class="req">*</span></label>
         <p class="input-desc">We will use this email if you want further details.</p>
-        <input id="custEmail"required type="email" placeholder="example@farm.com">
+        <input id="custEmail" required type="email" placeholder="example@farm.com">
+        <div class="field-error" id="emailError">Please enter a valid email address.</div>
       </div>
       <div class="form-group">
-        <label>Phone / WhatsApp</label>
+        <label for="custPhone">Phone / WhatsApp <span class="req">*</span></label>
         <p class="input-desc">Include country code for direct contact.</p>
-        <input id="custPhone"required type="text" placeholder="Include country code">
+        <input id="custPhone" required type="text" placeholder="Include country code">
+        <div class="field-error" id="phoneError">Please fill in your phone / WhatsApp number.</div>
       </div>
-      <div class="form-row">
-        <label>Country / Region</label>
-          <select id="countrySelect">
-          <option value="">Loading countries...</option>
-          </select>
-        <div class="hint">Select your farm's operating country or region</div>
-        <div class="error-text" style="color:red;display:none;">Please select your country / region</div>
+      <div class="form-group">
+        <label for="countrySelect">Country / Region <span class="req">*</span></label>
+        <p class="input-desc">Select your farm's operating country or region.</p>
+        <select id="countrySelect" required>
+          <option value="">Loading countries…</option>
+        </select>
+        <div class="field-error" id="countryError">Please select your country / region.</div>
       </div>
 
       <div class="form-group">
-        <label>Industry</label>
+        <label for="custIndustry">Industry <span class="req">*</span></label>
         <p class="input-desc">Select the sector your farm business belongs to.</p>
-        <select id="custIndustry">
+        <select id="custIndustry" required>
           <option value="">Please select your industry</option>
           <option>Precision Agriculture</option>
           <option>Farming / Arable</option>
@@ -686,6 +719,7 @@ button:hover{
           <option>Agri‑tech Service</option>
           <option>Other</option>
         </select>
+        <div class="field-error" id="industryError">Please select your industry.</div>
       </div>
 
       <div class="btn-row">
@@ -703,7 +737,7 @@ button:hover{
   </div>
 </div>
 
-<!-- ========== Step 3: Result with Comparison Block ========== -->
+<!-- ========== Step 3: Result with Comparison Block + QR Code ========== -->
 <div class="step" id="step3">
   <div class="page-header">
     <h1>Your savings estimate.</h1>
@@ -711,7 +745,7 @@ button:hover{
   </div>
   <div class="form-card">
     <div id="resultCapture">
-      <h3 style="margin‑bottom:20px">Personalized Annual ROI Report <span style="color:#2b7d5a;font‑weight:bold;">with Auto‑Steering Kit</span></h3>
+      <h3 style="margin-bottom:20px">Personalized Annual ROI Report <span style="color:#2b7d5a;font-weight:bold;">with Auto‑Steering Kit</span></h3>
 
       <div class="result-row">
         <span>Estimated Annual Savings</span>
@@ -761,12 +795,31 @@ button:hover{
         <button id="resetAll">Start over</button>
       </div>
     </div>
+
+    <!-- ========== 结果页二维码（来自 GitHub 仓库 qr-code.jpg） ========== -->
+    <div class="qr-block">
+      <img id="qrCodeImg" alt="QR Code" onerror="this.style.display='none';">
+      <p>Scan the QR code to learn more</p>
+    </div>
+
     <p class="disclaimer">Disclaimer: All outputs are estimates based on generalized industry benchmarks. Actual savings depend on field geometry, operator habits, local pricing, weather and crop type. This independent estimator is not affiliated with any hardware manufacturer. Your contact information will not be shared with third parties.</p>
   </div>
 </div>
 
 <script>
+// ========== Google Apps Script 地址 ==========
 const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUbYguLrNRJSBIC3YpsnJWUV7XcdUxqJaZBgkq6l1Llrh_2rd0A_d4gnYe959fSveN/exec";
+
+// ============================================================
+// ========== GitHub 资源地址（唯一需要你替换的地方） ==========
+// 把下面这行换成你的真实仓库，例如：
+//   const GITHUB_BASE = "https://raw.githubusercontent.com/你的用户名/你的仓库/main/";
+// 注意：仓库必须是公开的，结尾要有 "/"，分支名 main 或 master 二选一。
+// country.txt（国家名单）和 qr-code.jpg（二维码）都放在该仓库根目录。
+// ============================================================
+const GITHUB_BASE = "https://raw.githubusercontent.com/REPLACE_WITH_YOUR_USER/REPLACE_WITH_YOUR_REPO/main/";
+const COUNTRY_FILE_URL = GITHUB_BASE + "country.txt";
+const QR_CODE_URL = GITHUB_BASE + "qr-code.jpg";
 
 let activeStepNumber = 0;
 const steps = ["step0","step1","step2","step3"];
@@ -819,127 +872,151 @@ initOptionGroup('farmSizeOptions','farmSizeOtherWrap');
 initOptionGroup('hoursOptions');
 initOptionGroup('regionOptions','laborOtherWrap');
 
-// ========== Navigation ==========
-document.getElementById('startCalculator').onclick = ()=> setActiveStep(1);
-document.getElementById('goStep2').onclick = ()=> setActiveStep(2);
-document.getElementById('backStep1').onclick = ()=> setActiveStep(1);
-document.getElementById('backStep2').onclick = ()=> setActiveStep(2);
-document.getElementById('resetAll').onclick = ()=>{
-  setActiveStep(0);
-};
+// ========== 国家下拉菜单：从 GitHub 仓库 country.txt 加载 ==========
+function populateCountries(selectEl, list){
+  selectEl.innerHTML = '<option value="">Select your country / region</option>';
+  list.forEach(country=>{
+    const option = document.createElement('option');
+    option.value = country;
+    option.textContent = country;
+    selectEl.appendChild(option);
+  });
+  // 名单里没有 "Other" 时补一个，避免个别地区用户无法选择
+  if(!list.includes('Other')){
+    const option = document.createElement('option');
+    option.value = 'Other';
+    option.textContent = 'Other';
+    selectEl.appendChild(option);
+  }
+}
 
+function loadCountries(){
+  const selectEl = document.getElementById('countrySelect');
+  if(!selectEl) return;
+
+  fetch(COUNTRY_FILE_URL)
+    .then(response => {
+      if(!response.ok) throw new Error('HTTP ' + response.status);
+      return response.text();
+    })
+    .then(text => {
+      const list = text
+        .split(/\r?\n/)
+        .map(country => country.trim())
+        .filter(country => country.length > 0);
+      if(list.length === 0) throw new Error('country.txt is empty');
+      populateCountries(selectEl, list);
+    })
+    .catch(error => {
+      // GitHub 地址未替换 / 仓库不可访问时，使用兜底名单，页面不会报错
+      console.error('Failed to load countries from GitHub:', error);
+      populateCountries(selectEl, [
+        "United States","Canada","United Kingdom","Germany","France","Australia","China","Other"
+      ]);
+    });
+}
+
+// ========== Navigation ==========
+document.getElementById('startCalculator').addEventListener('click', ()=> setActiveStep(1));
+document.getElementById('goStep2').addEventListener('click', ()=>{
+  // 农场面积没有默认值，避免空选导致计算失真
+  if(!document.querySelector('#farmSizeOptions .option-card.active')){
+    alert('Please choose your farm size first.');
+    return;
+  }
+  setActiveStep(2);
+});
+document.getElementById('backStep1').addEventListener('click', ()=> setActiveStep(1));
+document.getElementById('backStep2').addEventListener('click', ()=> setActiveStep(2));
+document.getElementById('resetAll').addEventListener('click', resetCalculator);
+
+// ========== 线索收集必填校验（姓名/邮箱/电话/国家/行业） ==========
+function validateLeadForm(){
+  const rules = [
+    { id:'custName',      err:'nameError',      test: v => v.length > 0 },
+    { id:'custEmail',     err:'emailError',     test: v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) },
+    { id:'custPhone',     err:'phoneError',     test: v => v.length > 0 },
+    { id:'countrySelect', err:'countryError',   test: v => v.length > 0 },
+    { id:'custIndustry',  err:'industryError',  test: v => v.length > 0 }
+  ];
+  let ok = true;
+  let firstInvalid = null;
+  rules.forEach(r=>{
+    const el = document.getElementById(r.id);
+    const err = document.getElementById(r.err);
+    const v = el ? el.value.trim() : '';
+    const valid = r.test(v);
+    if(!valid){
+      ok = false;
+      if(!firstInvalid) firstInvalid = el;
+      if(err) err.style.display = 'block';
+      if(el) el.style.borderColor = '#e74c3c';
+    }else{
+      if(err) err.style.display = 'none';
+      if(el) el.style.borderColor = '';
+    }
+  });
+  if(firstInvalid && firstInvalid.focus) firstInvalid.focus();
+  return ok;
+}
+
+// ========== 收集用户数据（只保留本页真实存在的元素） ==========
 function collectUserData(){
   const farmSizeCard = document.querySelector('#farmSizeOptions .option-card.active');
-  let farmSize = "";
-  let farmSizeOtherInput = "";
-
-  if(farmSizeCard.dataset.value === 'other'){
-    farmSize = "Other";
-    farmSizeOtherInput = document.getElementById('farmSizeOther').value;
-  }else{
-    farmSize = farmSizeCard.innerText.trim();
+  let farmSize = '';
+  if(farmSizeCard){
+    farmSize = farmSizeCard.dataset.value === 'other' ? 'Other' : farmSizeCard.dataset.value;
   }
-
-  const hours = document.querySelector('#hoursOptions .option-card.active').innerText.trim();
+  const hoursCard = document.querySelector('#hoursOptions .option-card.active');
   const regionCard = document.querySelector('#regionOptions .option-card.active');
-  let labor = regionCard.innerText.trim();
-  let laborOtherInput = document.getElementById('laborOtherInput').value || "";
-  const annualFuel = document.getElementById('annualFuel').value || "";
 
-  const name = document.getElementById('custName').value || "";
-  const email = document.getElementById('custEmail').value || "";
-  const phone = document.getElementById('custPhone').value || "";
-  const country = document.getElementById('custRegion').value || "";
-  const industry = document.getElementById('custIndustry').value || "";
-if (!name || !countryVal || !mail) {
-        alert("Please fill all required fields.");
-        return;
-    }
-
-    if (!/^[^@]+@[^@]+\.[^@]+$/.test(mail)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
-
-    const url =
-        API_URL +
-        "?action=lead" +
-        "&name=" + encodeURIComponent(name) +
-        "&country=" + encodeURIComponent(countryVal) +
-        "&email=" + encodeURIComponent(mail) +
-        "&score=" + encodeURIComponent(score) +
-        "&industry=" + encodeURIComponent(industry) +
-        "&interest=" + encodeURIComponent(interests);
-
-    fetch(url)
-        .then(response => response.json())
-        .then(resp => {
-
-            console.log(resp);
-
-            if (resp.status === "duplicate") {
-                alert("This email has already been submitted.");
-                return;
-            }
-
-            if (resp.status === "success") {
-              const result = getResultLevel(score, questions.length);
-
-              const tenPointScore = getScoreOutOfTen();
-
-              document.getElementById("finalScore").innerText =
-                `Your Score: ${tenPointScore}`;
-
-              document.getElementById("resultLevel").innerText = result.title;
-
-              document.getElementById("resultComment").innerText = result.comment;
-
-              document.getElementById("lead").classList.add("hidden");
-              document.getElementById("thanks").classList.remove("hidden");
-}
-
-        })
-        .catch(error => {
-            console.error(error);
-            alert("Submission failed.");
-        });
-}
   return {
     timestamp: new Date().toISOString(),
-    name: name,
-    email: email,
-    phone: phone,
-    country: country,
-    industry: industry,
+    name: document.getElementById('custName').value.trim(),
+    email: document.getElementById('custEmail').value.trim(),
+    phone: document.getElementById('custPhone').value.trim(),
+    country: document.getElementById('countrySelect').value,
+    industry: document.getElementById('custIndustry').value,
     farmSize: farmSize,
-    farmSizeOtherInput: farmSizeOtherInput,
-    machineHours: hours,
-    labor: labor,
-    laborOtherInput: laborOtherInput,
-    annualFuel: annualFuel
+    farmSizeOtherInput: document.getElementById('farmSizeOther').value.trim(),
+    machineHours: hoursCard ? hoursCard.dataset.value : '',
+    labor: regionCard ? regionCard.dataset.value : '',
+    laborOtherInput: document.getElementById('laborOtherInput').value.trim(),
+    annualFuel: document.getElementById('annualFuel').value.trim()
   };
 }
 
+// ========== 提交到 Google Sheet ==========
+// 注意：no-cors 模式下浏览器看不到响应状态，无法判断成功/失败。
+// Apps Script 端需用 doPost(e) 读取 e.postData.contents，并 JSON.parse 后再写入表格。
 async function sendToGoogleSheet(data){
   try{
-    const res = await fetch(GOOGLE_SCRIPT_WEB_APP_URL,{
-  method:"POST",
-  mode:"no-cors",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify(data)
-});
-    console.log("Data sent to Google Sheet");
+    await fetch(GOOGLE_SCRIPT_WEB_APP_URL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(data)
+    });
+    console.log("Lead submitted to Google Sheet (opaque response, cannot read status).");
   }catch(err){
     console.error("Google Sheet submit error:", err);
   }
 }
 
 // ========== Annual Calculation ==========
-document.getElementById('goStep3').addEventListener('click', async ()=>{
-  const activeHours = Number(document.querySelector('#hoursOptions .option-card.active').dataset.value);
-  const activeRegion = document.querySelector('#regionOptions .option-card.active').dataset.value;
-  const annualFuel = Number(document.getElementById('annualFuel').value)||0;
-  const farmSizeCard = document.querySelector('#farmSizeOptions .option-card.active');
+document.getElementById('goStep3').addEventListener('click', ()=>{
+  // 1) 先做必填校验，未通过直接返回，不计算、不提交
+  if(!validateLeadForm()) return;
+
+  // 2) 读取输入
+  const hoursCard = document.querySelector('#hoursOptions .option-card.active');
+  const activeHours = hoursCard ? Number(hoursCard.dataset.value) : 1000;
+  const regionCard = document.querySelector('#regionOptions .option-card.active');
+  const activeRegion = regionCard ? regionCard.dataset.value : 'usa';
+  const annualFuel = Number(document.getElementById('annualFuel').value) || 0;
+
+  let farmSizeCard = document.querySelector('#farmSizeOptions .option-card.active');
+  if(!farmSizeCard) farmSizeCard = document.querySelector('#farmSizeOptions .option-card'); // 兜底，正常流程不会走到
   let farmSize;
   if(farmSizeCard.dataset.value === 'other'){
     farmSize = Number(document.getElementById('farmSizeOther').value) || 0;
@@ -967,8 +1044,11 @@ document.getElementById('goStep3').addEventListener('click', async ()=>{
 
   // Default system investment assumption (hidden from user)
   const systemInvestment = 2900;
-  let paybackMonths = saveTotal > 0 ? (systemInvestment / saveTotal) * 12 : 999;
-  if(paybackMonths>999) paybackMonths=999;
+  let paybackMonths = 999;
+  if(saveTotal > 0){
+    paybackMonths = (systemInvestment / saveTotal) * 12;
+    if(paybackMonths >= 999) paybackMonths = 999;
+  }
 
   const threeYearRoi = saveTotal * 3 - systemInvestment;
 
@@ -976,11 +1056,14 @@ document.getElementById('goStep3').addEventListener('click', async ()=>{
   const withoutAnnual = annualLaborCost + annualFuel;
   const withAnnual = withoutAnnual - saveTotal;
 
-  // Populate result
+  // 3) 填充结果
   document.getElementById('saveLabor').textContent = `$${saveLabor.toFixed(0)}`;
   document.getElementById('saveFuel').textContent = `$${saveFuel.toFixed(0)}`;
   document.getElementById('saveTotal').textContent = `$${saveTotal.toFixed(0)}`;
-  document.getElementById('paybackMonths').textContent = paybackMonths >=999 ? "No positive return" : `${paybackMonths.toFixed(1)} months`;
+  document.getElementById('paybackMonths').textContent =
+    paybackMonths >= 999
+      ? (saveTotal > 0 ? '999+ months' : 'No positive return')
+      : `${paybackMonths.toFixed(1)} months`;
   document.getElementById('threeYearRoi').textContent = `$${threeYearRoi.toFixed(0)}`;
 
   document.getElementById('withoutValue').textContent = `$${withoutAnnual.toFixed(0)} / year`;
@@ -988,15 +1071,14 @@ document.getElementById('goStep3').addEventListener('click', async ()=>{
   document.getElementById('bigSaveNumber').textContent = `$${saveTotal.toFixed(0)}`;
   document.getElementById('saveTextNum').textContent = saveTotal.toFixed(0);
 
-  // Collect and send user data to Google Sheet
+  // 4) 先展示结果页（不等待提交），线索在后台异步提交，避免网络慢时卡住用户
   const userData = collectUserData();
-  await sendToGoogleSheet(userData);
-
   setActiveStep(3);
+  sendToGoogleSheet(userData);
 });
 
 // ========== Screenshot Share ==========
-document.getElementById('captureShareBtn').addEventListener('click',async ()=>{
+document.getElementById('captureShareBtn').addEventListener('click', async ()=>{
   const captureDom = document.getElementById('resultCapture');
   try{
     const canvas = await html2canvas(captureDom,{
@@ -1013,35 +1095,46 @@ document.getElementById('captureShareBtn').addEventListener('click',async ()=>{
     console.error(e);
   }
 });
-  function loadCountries() {
-    const countrySelect = document.getElementById("country");
 
-    fetch("countries.txt")
-        .then(response => response.text())
-        .then(text => {
-            text
-                .split(/\r?\n/)
-                .map(country => country.trim())
-                .filter(country => country)
-                .forEach(country => {
-                    const option = document.createElement("option");
-                    option.value = country;
-                    option.textContent = country;
-                    countrySelect.appendChild(option);
-                });
-        })
-        .catch(error => {
-            console.error("Failed to load countries:", error);
+// ========== 重置计算器（回到首页并清空所有输入） ==========
+function resetCalculator(){
+  ['farmSizeOther','laborOtherInput','annualFuel','custName','custEmail','custPhone'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  const countrySel = document.getElementById('countrySelect');
+  if(countrySel) countrySel.value = '';
+  const industrySel = document.getElementById('custIndustry');
+  if(industrySel) industrySel.value = '';
 
-            ["United States", "Canada", "United Kingdom", "Germany", "China", "Other"]
-                .forEach(country => {
-                    const option = document.createElement("option");
-                    option.value = country;
-                    option.textContent = country;
-                    countrySelect.appendChild(option);
-                });
-        });
+  // 选项卡片恢复默认（工时 1000h、地区 USA），农场面积清空等待用户重新选择
+  document.querySelectorAll('#hoursOptions .option-card').forEach(c=>{
+    c.classList.toggle('active', c.dataset.value === '1000');
+  });
+  document.querySelectorAll('#regionOptions .option-card').forEach(c=>{
+    c.classList.toggle('active', c.dataset.value === 'usa');
+  });
+  document.querySelectorAll('#farmSizeOptions .option-card').forEach(c=>{
+    c.classList.remove('active');
+  });
+  ['farmSizeOtherWrap','laborOtherWrap'].forEach(id=>{
+    const w = document.getElementById(id);
+    if(w) w.classList.remove('show');
+  });
+
+  // 清除校验错误提示
+  document.querySelectorAll('.field-error').forEach(e=> e.style.display = 'none');
+  document.querySelectorAll('input, select').forEach(el => el.style.borderColor = '');
+
+  setActiveStep(0);
 }
+
+// ========== 页面加载：加载国家名单 + 设置二维码地址 ==========
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadCountries();
+  const qrImg = document.getElementById('qrCodeImg');
+  if(qrImg) qrImg.src = QR_CODE_URL;
+});
 </script>
 </body>
 </html>
