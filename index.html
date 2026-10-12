@@ -661,21 +661,21 @@ button:hover{
         <div class="field-error" id="farmSizeError">Please choose your farm size.</div>
       </div>
 
-      <!-- Annual machine hours -->
+      <!-- Weekly machine hours -->
       <div class="form-group">
-        <label>How many hours do your machines work each year?</label>
-        <p class="input-desc">Total annual working hours of tractors and field equipment. Longer operation hours create higher saving potential.</p>
+        <label>How many hours do your machines work each week?</label>
+        <p class="input-desc">Average weekly working hours for tractors and field equipment. We use 52 weeks per year to estimate annual savings.</p>
         <div class="option-group" id="hoursOptions">
-          <div class="option-card" data-value="500">500 h</div>
-          <div class="option-card" data-value="1000">1,000 h</div>
-          <div class="option-card" data-value="1500">1,500 h</div>
-          <div class="option-card" data-value="2000">2,000+ h</div>
+          <div class="option-card" data-value="10">10 h / week</div>
+          <div class="option-card" data-value="20">20 h / week</div>
+          <div class="option-card" data-value="30">30 h / week</div>
+          <div class="option-card" data-value="40">40+ h / week</div>
           <div class="option-card" data-value="other">Other</div>
         </div>
         <div class="conditional-input" id="hoursOtherWrap">
-          <input id="hoursOther" type="number" min="0" placeholder="Machine hours: ___ h / year">
+          <input id="hoursOther" type="number" min="0" placeholder="Machine hours: ___ h / week">
         </div>
-        <div class="field-error" id="hoursError">Please choose your annual machine hours.</div>
+        <div class="field-error" id="hoursError">Please choose your weekly machine hours.</div>
       </div>
 
       <!-- Labor cost -->
@@ -1095,8 +1095,8 @@ function collectUserData(){
     industry: document.getElementById('custIndustry').value,
     farmSize: farmSize,
     farmSizeOtherInput: document.getElementById('farmSizeOther').value.trim(),
-    machineHours: hoursCard ? (hoursCard.dataset.value === 'other' ? 'Other' : hoursCard.dataset.value) : '',
-    hoursOtherInput: document.getElementById('hoursOther').value.trim(),
+    machineHoursWeekly: hoursCard ? (hoursCard.dataset.value === 'other' ? 'Other' : hoursCard.dataset.value) : '',
+    hoursOtherInputWeekly: document.getElementById('hoursOther').value.trim(),
     labor: regionCard ? regionCard.dataset.value : '',
     laborOtherInput: document.getElementById('laborOtherInput').value.trim(),
     annualFuel: document.getElementById('annualFuel').value.trim()
@@ -1127,14 +1127,15 @@ document.getElementById('goStep3').addEventListener('click', ()=>{
 
   // 2) 读取输入
   const hoursCard = document.querySelector('#hoursOptions .option-card.active');
-  let activeHours;
+  let weeklyMachineHours;
   if(hoursCard && hoursCard.dataset.value === 'other'){
-    activeHours = Number(document.getElementById('hoursOther').value) || 0;
+    weeklyMachineHours = Number(document.getElementById('hoursOther').value) || 0;
   }else{
-    activeHours = hoursCard ? Number(hoursCard.dataset.value) : 1000;
+    weeklyMachineHours = hoursCard ? Number(hoursCard.dataset.value) : 20;
   }
   const regionCard = document.querySelector('#regionOptions .option-card.active');
   const activeRegion = regionCard ? regionCard.dataset.value : 'asia';
+  const annualMachineHours = weeklyMachineHours * 52;
   const annualFuel = Number(document.getElementById('annualFuel').value) || 0;
 
   let farmSizeCard = document.querySelector('#farmSizeOptions .option-card.active');
@@ -1159,7 +1160,7 @@ document.getElementById('goStep3').addEventListener('click', ()=>{
   const hourlyRate = regionRates[activeRegion] || 22;
 
   // Labor saving assumption: auto‑steering reduces operator cost by 30% annually
-  const annualLaborCost = activeHours * hourlyRate;
+  const annualLaborCost = annualMachineHours * hourlyRate;
   const saveLabor = annualLaborCost * 0.30;
 
   // Fuel / operating cost saving: 8% annual reduction assumption
