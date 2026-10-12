@@ -4,7 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Smart Farm Savings | Precision Guidance ROI Estimator</title>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- 主 CDN 加载失败时自动切换到备用 CDN，保证截图功能可用 -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"
+        onerror="(function(){if(!window.__h2cFb){window.__h2cFb=1;var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';document.head.appendChild(s);}})()"></script>
 
 <style>
 *{
@@ -146,6 +148,24 @@ input:focus, select:focus{
   gap:12px;
   flex-wrap:wrap;
 }
+/* 结果页按钮：截图居中、Start over 最右 */
+.btn-split{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:12px;
+  align-items:center;
+}
+.btn-split .btn-spacer{
+  grid-column:1;
+}
+.btn-split #captureShareBtn{
+  grid-column:2;
+  justify-self:center;
+}
+.btn-split #resetAll{
+  grid-column:3;
+  justify-self:end;
+}
 button{
   padding:14px 24px;
   background:#60b873;
@@ -230,8 +250,9 @@ button:hover{
   font-size:13px;
   color:#55665e;
   line-height:1.5;
-  
-  /* ========== QR Code Block (结果页) ========== */
+}
+
+/* ========== QR Code Block (结果页) ========== */
 .qr-block{
   text-align:center;
   margin-top:28px;
@@ -250,9 +271,6 @@ button:hover{
   color:#66776f;
   margin-top:10px;
 }
-}
-
-
 
 /* ========== Comparison Block ========== */
 .comparison{
@@ -538,6 +556,18 @@ button:hover{
   .btn-group button{
     flex:1;
   }
+  .btn-split{
+    grid-template-columns:1fr 1fr;
+  }
+  .btn-split .btn-spacer{
+    display:none;
+  }
+  .btn-split #captureShareBtn{
+    grid-column:1;
+  }
+  .btn-split #resetAll{
+    grid-column:2;
+  }
 }
 </style>
 </head>
@@ -545,7 +575,8 @@ button:hover{
 
 <!-- ========== 顶部 Logo ========== -->
 <div class="logo-top-right">
-  <img src="logo.png" alt="SingularXYZ Logo" onerror="this.parentElement.style.display='none';">
+  <img id="topLogo" src="logo.png" alt="SingularXYZ Logo" crossOrigin="anonymous"
+       onerror="logoFallback(this)">
 </div>
 
 <!-- ========== Step 0: Hero Animation ========== -->
@@ -627,6 +658,7 @@ button:hover{
         <div class="conditional-input" id="farmSizeOtherWrap">
           <input id="farmSizeOther" type="number" min="0" placeholder="Farm Size: ___ ha">
         </div>
+        <div class="field-error" id="farmSizeError">Please choose your farm size.</div>
       </div>
 
       <!-- Annual machine hours -->
@@ -635,10 +667,15 @@ button:hover{
         <p class="input-desc">Total annual working hours of tractors and field equipment. Longer operation hours create higher saving potential.</p>
         <div class="option-group" id="hoursOptions">
           <div class="option-card" data-value="500">500 h</div>
-          <div class="option-card active" data-value="1000">1,000 h</div>
+          <div class="option-card" data-value="1000">1,000 h</div>
           <div class="option-card" data-value="1500">1,500 h</div>
           <div class="option-card" data-value="2000">2,000+ h</div>
+          <div class="option-card" data-value="other">Other</div>
         </div>
+        <div class="conditional-input" id="hoursOtherWrap">
+          <input id="hoursOther" type="number" min="0" placeholder="Machine hours: ___ h / year">
+        </div>
+        <div class="field-error" id="hoursError">Please choose your annual machine hours.</div>
       </div>
 
       <!-- Labor cost -->
@@ -646,14 +683,18 @@ button:hover{
         <label>What's your average labor cost?</label>
         <p class="input-desc">Average hourly cost for farm machine operators, including wages and benefits.</p>
         <div class="option-group" id="regionOptions">
-          <div class="option-card active" data-value="usa">USA</div>
+          <div class="option-card" data-value="asia">Asia</div>
           <div class="option-card" data-value="europe">Europe</div>
-          <div class="option-card" data-value="australia">Australia</div>
+          <div class="option-card" data-value="north-america">North America</div>
+          <div class="option-card" data-value="south-america">South America</div>
+          <div class="option-card" data-value="africa">Africa</div>
+          <div class="option-card" data-value="oceania">Oceania</div>
           <div class="option-card" data-value="other">Other</div>
         </div>
         <div class="conditional-input" id="laborOtherWrap">
           <input id="laborOtherInput" type="number" min="0" placeholder="$ ___ / hour">
         </div>
+        <div class="field-error" id="regionError">Please choose your labor cost region.</div>
       </div>
 
       <!-- Annual fuel -->
@@ -661,6 +702,7 @@ button:hover{
         <label>How much do you spend on fuel annually?</label>
         <p class="input-desc">Total fuel expenditure for all field machines over one full farming season.</p>
         <input id="annualFuel" type="number" min="0" placeholder="e.g. $12000 / year">
+        <div class="field-error" id="fuelError">Please enter your annual fuel spend.</div>
       </div>
 
       <div class="btn-row">
@@ -709,9 +751,9 @@ button:hover{
       </div>
 
       <div class="form-group">
-        <label for="custIndustry">Industry <span class="req">*</span></label>
+        <label for="custIndustry">Industry</label>
         <p class="input-desc">Select the sector your farm business belongs to.</p>
-        <select id="custIndustry" required>
+        <select id="custIndustry">
           <option value="">Please select your industry</option>
           <option>Precision Agriculture</option>
           <option>Farming / Arable</option>
@@ -721,7 +763,6 @@ button:hover{
           <option>Agri‑tech Service</option>
           <option>Other</option>
         </select>
-        <div class="field-error" id="industryError">Please select your industry.</div>
       </div>
 
       <div class="btn-row">
@@ -747,6 +788,11 @@ button:hover{
   </div>
   <div class="form-card">
     <div id="resultCapture">
+      <!-- 报告内 Logo：默认隐藏，只在截图时与二维码一起显示 -->
+      <div id="reportLogoWrap" style="display:none;text-align:center;margin-bottom:16px;">
+        <img id="reportLogo" src="logo.png" alt="SingularXYZ" crossOrigin="anonymous"
+             onerror="logoFallback(this)" style="height:44px;width:auto;max-width:220px;">
+      </div>
       <h3 style="margin-bottom:20px">Personalized Annual ROI Report <span style="color:#2b7d5a;font-weight:bold;">with Auto‑Steering Kit</span></h3>
 
       <div class="result-row">
@@ -789,19 +835,22 @@ button:hover{
         </div>
       </div>
 
+      <!-- 二维码：默认隐藏，只在点击“截图并下载”时临时显示并进入截图。
+           crossOrigin=anonymous 让 html2canvas 能以 CORS 方式读取图片，
+           否则跨域图片在截图里只会显示边框、画不出二维码本身 -->
+      <div class="qr-block" id="qrBlock" style="display:none;text-align:center;">
+        <img id="qrCodeImg" alt="QR Code" crossOrigin="anonymous" onerror="this.style.display='none';">
+        <p>Scan the QR code to learn more</p>
+      </div>
+
     </div>
     <div class="btn-row">
-      <div class="btn-group">
-        <button class="btn-back" id="backStep2">Back</button>
-        <button id="captureShareBtn">📷 Screenshot & Download Report</button>
+      <!-- 截图按钮居中、Start over 在最右，中间用空位隔开 -->
+      <div class="btn-group btn-split">
+        <span class="btn-spacer" aria-hidden="true"></span>
+        <button id="captureShareBtn"> Download Report</button>
         <button id="resetAll">Start over</button>
       </div>
-    </div>
-
-    <!-- ========== 结果页二维码（来自 GitHub 仓库 qr-code.jpg） ========== -->
-    <div class="qr-block">
-      <img id="qrCodeImg" alt="QR Code" onerror="this.style.display='none';">
-      <p>Scan the QR code to learn more</p>
     </div>
 
     <p class="disclaimer">Disclaimer: All outputs are estimates based on generalized industry benchmarks. Actual savings depend on field geometry, operator habits, local pricing, weather and crop type. This independent estimator is not affiliated with any hardware manufacturer. Your contact information will not be shared with third parties.</p>
@@ -813,15 +862,13 @@ button:hover{
 const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUbYguLrNRJSBIC3YpsnJWUV7XcdUxqJaZBgkq6l1Llrh_2rd0A_d4gnYe959fSveN/exec";
 
 // ============================================================
-// ========== GitHub 资源地址（唯一需要你替换的地方） ==========
-// 把下面这行换成你的真实仓库，例如：
-//   const GITHUB_BASE = "https://raw.githubusercontent.com/你的用户名/你的仓库/main/";
-// 注意：仓库必须是公开的，结尾要有 "/"，分支名 main 或 master 二选一。
-// country.txt（国家名单）和 qr-code.jpg（二维码）都放在该仓库根目录。
+// ========== GitHub 资源地址 ==========
+// 仓库：shangyuwang038/agri-ROI-calculator（公开，默认分支 main）
+// 国家名单：country.txt；二维码：qr-code.png（PNG 格式）
 // ============================================================
-const GITHUB_BASE = "https://github.com/shangyuwang038/agri-ROI-calculator/blob/main/";
+const GITHUB_BASE = "https://raw.githubusercontent.com/shangyuwang038/agri-ROI-calculator/main/";
 const COUNTRY_FILE_URL = GITHUB_BASE + "country.txt";
-const QR_CODE_URL = GITHUB_BASE + "qr-code.jpg";
+const QR_CODE_URL = GITHUB_BASE + "qr-code.png";
 
 let activeStepNumber = 0;
 const steps = ["step0","step1","step2","step3"];
@@ -855,6 +902,8 @@ function setActiveStep(n){
 function initOptionGroup(groupId, conditionalWrapId){
   const group = document.getElementById(groupId);
   if(!group) return;
+  // 对应字段下方的红字错误提示（farmSizeOptions → farmSizeError，依此类推）
+  const errEl = document.getElementById(groupId.replace('Options','Error'));
   group.querySelectorAll('.option-card').forEach(card=>{
     card.addEventListener('click',()=>{
       group.querySelectorAll('.option-card').forEach(c=>c.classList.remove('active'));
@@ -867,12 +916,37 @@ function initOptionGroup(groupId, conditionalWrapId){
           wrap.classList.remove('show');
         }
       }
+      // 已选择 → 立即隐藏该字段的红字提示
+      if(errEl) errEl.style.display = 'none';
     });
   });
 }
 initOptionGroup('farmSizeOptions','farmSizeOtherWrap');
-initOptionGroup('hoursOptions');
+initOptionGroup('hoursOptions','hoursOtherWrap');
 initOptionGroup('regionOptions','laborOtherWrap');
+
+// 燃油输入时即时消除红字提示
+const fuelLiveEl = document.getElementById('annualFuel');
+if(fuelLiveEl){
+  fuelLiveEl.addEventListener('input', ()=>{
+    if(fuelLiveEl.value.trim() !== ''){
+      const err = document.getElementById('fuelError');
+      if(err) err.style.display = 'none';
+      fuelLiveEl.style.borderColor = '';
+    }
+  });
+}
+
+// ========== Logo 兜底（内联 onerror 调用，本地 logo.png 缺失时改用 GitHub 仓库的） ==========
+window.logoFallback = function(img){
+  if(!img.dataset.fallback){
+    img.dataset.fallback = '1';
+    img.src = GITHUB_BASE + 'logo.png';
+  }else{
+    const holder = img.closest('.logo-top-right') || img.parentElement;
+    if(holder) holder.style.display = 'none';
+  }
+};
 
 // ========== 国家下拉菜单：从 GitHub 仓库 country.txt 加载 ==========
 function populateCountries(selectEl, list){
@@ -921,25 +995,65 @@ function loadCountries(){
 // ========== Navigation ==========
 document.getElementById('startCalculator').addEventListener('click', ()=> setActiveStep(1));
 document.getElementById('goStep2').addEventListener('click', ()=>{
-  // 农场面积没有默认值，避免空选导致计算失真
-  if(!document.querySelector('#farmSizeOptions .option-card.active')){
-    alert('Please choose your farm size first.');
-    return;
+  // 农场问题校验：不弹窗，只在各字段下方显示红字提示
+  let ok = true;
+
+  // 农场面积
+  const farmSelected = !!document.querySelector('#farmSizeOptions .option-card.active');
+  const farmErr = document.getElementById('farmSizeError');
+  if(!farmSelected){
+    ok = false;
+    if(farmErr) farmErr.style.display = 'block';
+  }else if(farmErr){
+    farmErr.style.display = 'none';
   }
-  setActiveStep(2);
+
+  // 机器工时
+  const hoursSelected = !!document.querySelector('#hoursOptions .option-card.active');
+  const hoursErr = document.getElementById('hoursError');
+  if(!hoursSelected){
+    ok = false;
+    if(hoursErr) hoursErr.style.display = 'block';
+  }else if(hoursErr){
+    hoursErr.style.display = 'none';
+  }
+
+  // 人工成本地区
+  const regionSelected = !!document.querySelector('#regionOptions .option-card.active');
+  const regionErr = document.getElementById('regionError');
+  if(!regionSelected){
+    ok = false;
+    if(regionErr) regionErr.style.display = 'block';
+  }else if(regionErr){
+    regionErr.style.display = 'none';
+  }
+
+  // 燃油支出
+  const fuelEl = document.getElementById('annualFuel');
+  const fuelVal = fuelEl ? fuelEl.value.trim() : '';
+  const fuelOk = fuelVal !== '' && Number(fuelVal) > 0;
+  const fuelErr = document.getElementById('fuelError');
+  if(!fuelOk){
+    ok = false;
+    if(fuelErr) fuelErr.style.display = 'block';
+    if(fuelEl) fuelEl.style.borderColor = '#e74c3c';
+  }else{
+    if(fuelErr) fuelErr.style.display = 'none';
+    if(fuelEl) fuelEl.style.borderColor = '';
+  }
+
+  if(ok) setActiveStep(2);
 });
 document.getElementById('backStep1').addEventListener('click', ()=> setActiveStep(1));
-document.getElementById('backStep2').addEventListener('click', ()=> setActiveStep(2));
 document.getElementById('resetAll').addEventListener('click', resetCalculator);
 
-// ========== 线索收集必填校验（姓名/邮箱/电话/国家/行业） ==========
+// ========== 线索收集必填校验（姓名/邮箱/电话/国家；Industry 选填） ==========
 function validateLeadForm(){
   const rules = [
     { id:'custName',      err:'nameError',      test: v => v.length > 0 },
     { id:'custEmail',     err:'emailError',     test: v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) },
     { id:'custPhone',     err:'phoneError',     test: v => v.length > 0 },
-    { id:'countrySelect', err:'countryError',   test: v => v.length > 0 },
-    { id:'custIndustry',  err:'industryError',  test: v => v.length > 0 }
+    { id:'countrySelect', err:'countryError',   test: v => v.length > 0 }
   ];
   let ok = true;
   let firstInvalid = null;
@@ -981,7 +1095,8 @@ function collectUserData(){
     industry: document.getElementById('custIndustry').value,
     farmSize: farmSize,
     farmSizeOtherInput: document.getElementById('farmSizeOther').value.trim(),
-    machineHours: hoursCard ? hoursCard.dataset.value : '',
+    machineHours: hoursCard ? (hoursCard.dataset.value === 'other' ? 'Other' : hoursCard.dataset.value) : '',
+    hoursOtherInput: document.getElementById('hoursOther').value.trim(),
     labor: regionCard ? regionCard.dataset.value : '',
     laborOtherInput: document.getElementById('laborOtherInput').value.trim(),
     annualFuel: document.getElementById('annualFuel').value.trim()
@@ -1012,9 +1127,14 @@ document.getElementById('goStep3').addEventListener('click', ()=>{
 
   // 2) 读取输入
   const hoursCard = document.querySelector('#hoursOptions .option-card.active');
-  const activeHours = hoursCard ? Number(hoursCard.dataset.value) : 1000;
+  let activeHours;
+  if(hoursCard && hoursCard.dataset.value === 'other'){
+    activeHours = Number(document.getElementById('hoursOther').value) || 0;
+  }else{
+    activeHours = hoursCard ? Number(hoursCard.dataset.value) : 1000;
+  }
   const regionCard = document.querySelector('#regionOptions .option-card.active');
-  const activeRegion = regionCard ? regionCard.dataset.value : 'usa';
+  const activeRegion = regionCard ? regionCard.dataset.value : 'asia';
   const annualFuel = Number(document.getElementById('annualFuel').value) || 0;
 
   let farmSizeCard = document.querySelector('#farmSizeOptions .option-card.active');
@@ -1026,11 +1146,14 @@ document.getElementById('goStep3').addEventListener('click', ()=>{
     farmSize = Number(farmSizeCard.dataset.value);
   }
 
-  // Operator cost rates by region (USD / hour)
+  // Operator cost rates by continent (USD / hour) — 行业基准估算
   const regionRates = {
-    usa: 28,
+    asia: 15,
     europe: 32,
-    australia: 35,
+    'north-america': 28,
+    'south-america': 12,
+    africa: 10,
+    oceania: 35,
     other: Number(document.getElementById('laborOtherInput').value) || 22
   };
   const hourlyRate = regionRates[activeRegion] || 22;
@@ -1079,20 +1202,33 @@ document.getElementById('goStep3').addEventListener('click', ()=>{
   sendToGoogleSheet(userData);
 });
 
-// ========== Screenshot Share ==========
+// ========== Screenshot Share（二维码 + 报告 Logo 只在截图时出现） ==========
 document.getElementById('captureShareBtn').addEventListener('click', async ()=>{
   const captureDom = document.getElementById('resultCapture');
+  const qrBlock = document.getElementById('qrBlock');
+  const logoWrap = document.getElementById('reportLogoWrap');
   try{
+    // 截图前临时显示二维码和报告 Logo，截图完成后立即隐藏
+    if(qrBlock) qrBlock.style.display = 'block';
+    if(logoWrap) logoWrap.style.display = 'block';
+    await new Promise(r => setTimeout(r, 500)); // 等图片（二维码/Logo）解码完成
     const canvas = await html2canvas(captureDom,{
       scale:2,
-      backgroundColor:"#ffffff"
+      backgroundColor:"#ffffff",
+      useCORS:true,        // 允许以 CORS 方式读取 GitHub 上的图片，否则跨域图会画不出来
+      allowTaint:false,
+      imageTimeout:8000
     });
+    if(qrBlock) qrBlock.style.display = 'none';
+    if(logoWrap) logoWrap.style.display = 'none';
     const link = document.createElement('a');
     link.download = "Farm_ROI_Report.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
     alert('Report downloaded! You can share it on Facebook, WhatsApp or other channels.');
   }catch(e){
+    if(qrBlock) qrBlock.style.display = 'none';
+    if(logoWrap) logoWrap.style.display = 'none';
     alert('Capture failed, please try again or take a manual screenshot.');
     console.error(e);
   }
@@ -1100,7 +1236,7 @@ document.getElementById('captureShareBtn').addEventListener('click', async ()=>{
 
 // ========== 重置计算器（回到首页并清空所有输入） ==========
 function resetCalculator(){
-  ['farmSizeOther','laborOtherInput','annualFuel','custName','custEmail','custPhone'].forEach(id=>{
+  ['farmSizeOther','hoursOther','laborOtherInput','annualFuel','custName','custEmail','custPhone'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -1109,17 +1245,11 @@ function resetCalculator(){
   const industrySel = document.getElementById('custIndustry');
   if(industrySel) industrySel.value = '';
 
-  // 选项卡片恢复默认（工时 1000h、地区 USA），农场面积清空等待用户重新选择
-  document.querySelectorAll('#hoursOptions .option-card').forEach(c=>{
-    c.classList.toggle('active', c.dataset.value === '1000');
-  });
-  document.querySelectorAll('#regionOptions .option-card').forEach(c=>{
-    c.classList.toggle('active', c.dataset.value === 'usa');
-  });
-  document.querySelectorAll('#farmSizeOptions .option-card').forEach(c=>{
+  // 选项卡片全部清空，不做任何预选（与第一步交互保持一致）
+  document.querySelectorAll('#hoursOptions .option-card, #regionOptions .option-card, #farmSizeOptions .option-card').forEach(c=>{
     c.classList.remove('active');
   });
-  ['farmSizeOtherWrap','laborOtherWrap'].forEach(id=>{
+  ['farmSizeOtherWrap','hoursOtherWrap','laborOtherWrap'].forEach(id=>{
     const w = document.getElementById(id);
     if(w) w.classList.remove('show');
   });
@@ -1132,6 +1262,7 @@ function resetCalculator(){
 }
 
 // ========== 页面加载：加载国家名单 + 设置二维码地址 ==========
+// 注：Logo 兜底已通过内联 onerror="logoFallback(this)" 处理，避免监听挂载太晚漏掉报错
 document.addEventListener('DOMContentLoaded', ()=>{
   loadCountries();
   const qrImg = document.getElementById('qrCodeImg');
