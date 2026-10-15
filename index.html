@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Smart Farm Savings | Precision Guidance ROI Estimator</title>
+<title>Smart Farm Savings | Farm Saving Calculator</title>
 <!-- 主 CDN 加载失败时自动切换到备用 CDN，保证截图功能可用 -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"
         onerror="(function(){if(!window.__h2cFb){window.__h2cFb=1;var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';document.head.appendChild(s);}})()"></script>
@@ -337,6 +337,54 @@ button:hover{
   color:#1f382d;
 }
 
+/* ========== Product Promo ========== */
+.product-promo {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 20px;
+  align-items: center;
+  margin: 28px 0;
+  padding: 20px;
+  background: #f3f8f4;
+  border: 1px solid #dce9df;
+  border-radius: 16px;
+}
+
+.product-promo img {
+  display: block;
+  width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.product-promo h3 {
+  margin-bottom: 8px;
+  color: #22332c;
+}
+
+.product-promo p {
+  margin-bottom: 12px;
+  color: #52645a;
+  line-height: 1.6;
+}
+
+.product-promo a {
+  color: #2b7d5a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .product-promo {
+    grid-template-columns: 1fr;
+  }
+
+  .product-promo img {
+    max-height: 180px;
+  }
+}
+        
 /* ========== Step Screens ========== */
 .step{
   display:none;
@@ -607,11 +655,11 @@ button:hover{
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <div class="hero-tag">Precision Guidance ROI Estimator</div>
+      <div class="hero-tag">Farm Saving Calculator</div>
       <div class="hero-title1">Put Your Farm to the Test 🚜</div>
-      <div class="hero-title2">How much could autonomy change your farm economics?</div>
-      <p class="hero-sub">Estimate annual labor savings, operating cost savings and payback period based on your farm operating numbers.</p>
-      <button class="hero-button" id="startCalculator">Start Calculator →</button>
+      <div class="hero-title2">How could auto-steering make your workday easier?</div>
+      <p class="hero-sub">Estimate annual labor savings, operating cost savings and payback period based on your farm operating data</p>
+      <button class="hero-button" id="startCalculator">See What You Could Save →</button>
     </div>
   </div>
 </div>
@@ -635,8 +683,8 @@ button:hover{
 <!-- ========== Step 1: Single column stacked form ========== -->
 <div class="step" id="step1">
   <div class="page-header">
-    <h1>See where smarter guidance saves.</h1>
-    <p class="header-desc">Use your annual operating numbers to estimate potential savings from auto‑steering.</p>
+    <h1>Let’s explore where auto-steering could help.</h1>
+    <p class="header-desc">Tell us a little about your farm, and we’ll estimate what auto-steering could save you.</p>
     <div class="side-callout">
       <h3>Annual savings are what matter.<br/><br/>Less rework, less overlap, more consistent fieldwork.</h3>
     </div>
@@ -774,8 +822,7 @@ button:hover{
 
       <!-- 页面底部 信息使用规则 -->
       <div class="privacy-notice">
-        Information usage: The personal information you submit is only used to deliver your customized ROI report. We will not sell, rent or share your personal data with any third‑party organizations. You can request deletion of your submitted information at any time.
-      </div>
+        Information usage: The personal information you submit is only used to deliver your customized savings report. Your details may be shared with our internal sales team for this purpose. We will not sell, rent or share your personal data with any third‑party organizations. You can request deletion of your submitted information at any time. Savings figures in this website are estimates and may differ from actual results.      </div>
     </div>
   </div>
 </div>
@@ -783,8 +830,8 @@ button:hover{
 <!-- ========== Step 3: Result with Comparison Block + QR Code ========== -->
 <div class="step" id="step3">
   <div class="page-header">
-    <h1>Your savings estimate.</h1>
-    <p class="header-desc">These projections are calculated from the annual operating numbers you entered.</p>
+    <h1>Here’s what your farm could save.</h1>
+    <p class="header-desc">Based on what you shared, here’s an estimate of your farm’s savings potential.</p>
   </div>
   <div class="form-card">
     <div id="resultCapture">
@@ -804,15 +851,15 @@ button:hover{
         <span id="saveLabor">$0</span>
       </div>
       <div class="result-row">
-        <span>Operating Cost Savings</span>
+        <span>Fuel & Operating Cost Savings</span>
         <span id="saveFuel">$0</span>
       </div>
       <div class="result-row">
-        <span>Estimated Payback</span>
+        <span>Estimated Payback Period</span>
         <span id="paybackMonths">0 months</span>
       </div>
       <div class="result-row highlight">
-        <span>3‑Year ROI</span>
+        <span>3-Year Net Savings</span>
         <span id="threeYearRoi">$0</span>
       </div>
 
@@ -834,6 +881,26 @@ button:hover{
           </div>
         </div>
       </div>
+
+        <!-- Product Promo -->
+        <div class="product-promo">
+          <img
+            src="https://raw.githubusercontent.com/shangyuwang038/agri-ROI-calculator/main/SAgro200.png"
+            alt="SAgro200 auto-steering system"
+            crossorigin="anonymous"
+          >
+          <div>
+            <h3>Meet SAgro200</h3>
+            <p>
+              SAgro200 keeps every pass on track, helping you reduce overlap and finish fieldwork more efficiently.
+            </p>
+            <a
+              href="https://www.singularxyz.com/product_detail/SAgro200"
+              target="_blank"
+              rel="noopener"
+            >Explore SAgro200 →</a>
+          </div>
+        </div>
 
       <!-- 二维码：默认隐藏，只在点击“截图并下载”时临时显示并进入截图。
            crossOrigin=anonymous 让 html2canvas 能以 CORS 方式读取图片，
